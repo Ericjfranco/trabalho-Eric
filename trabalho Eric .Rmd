@@ -1,0 +1,97 @@
+---
+title: "trabalho"
+output: html_document
+---
+```{r}
+# Trabalho De Eric Franco #
+
+library(tidyverse)
+library(COVID19)
+library(readr)
+library(dplyr)
+library(plotly)
+library(knitr)
+
+usethis::use_git_config(user.name = "Ericjfranco" ,
+                        user.email = "ericjfranco@yahoo.com.br")
+usethis::browse_github_token ( )
+
+GITHUB_PAT= "9036c66d89858bc24a0ea6bfd0cdcfdc5c432866 "
+
+# Open URL 'https://github.com/Ericjfranco/trabalho-Eric/blob/master/trabalho_.R' #
+
+setwd("C:/UserR/")
+
+dcovid19 = covid19(level = 1)
+
+names(dcovid19)[names(dcovid19) == "id"] = "country"
+
+options(scipen = 999)
+dcovid19_2 = dcovid19 %>% select(country, tests, date, confirmed, deaths, population) %>%
+  filter(country %in% c("BRA", "RUS", "IND", "USA", "IDN", "PAK", "URY", "NZL", "NLD", "JPN", "ITA")) %>%
+  dplyr::mutate(taxa_casos_mil = (confirmed/population)*1000) %>%
+  dplyr::mutate(taxa_mortes_mil = (deaths/population)*1000) %>%
+  dplyr::mutate(taxa_testes_mil = (tests/population)*1000)
+  
+
+casos_mil_taxa = dcovid19_2 %>% group_by(date, country) %>% 
+  dplyr::summarise(taxa_casos_mil = sum(taxa_casos_mil)) %>%
+  filter(taxa_casos_mil > 0) %>% spread(key = "country", value = "taxa_casos_mil")
+
+mortes_mil_taxa = dcovid19_2 %>% group_by(date, country) %>% 
+  dplyr::summarise(taxa_mortes_mil = sum(taxa_mortes_mil)) %>%
+  filter(taxa_mortes_mil > 0) %>% spread(key = "country", value = "taxa_mortes_mil")
+
+testes_mil_taxa = dcovid19_2 %>% group_by(date, country) %>% 
+  dplyr::summarise(taxa_testes_mil = sum(taxa_testes_mil)) %>%
+  filter(taxa_testes_mil > 0) %>% spread(key = "country", value = "taxa_testes_mil")
+
+Casos = plot_ly(casos_mil_taxa, x = ~date, y = ~BRA, name = 'Brasil',mode = 'line', type = 'scatter') %>% 
+   add_trace(y = ~IDN, name = 'Indonesia', mode = 'line') %>% 
+   add_trace(y = ~IND, name = 'India', mode = 'line') %>% 
+   add_trace(y = ~ITA, name = 'Italia', mode = 'line') %>%
+  add_trace(y = ~JPN, name = 'Japao', mode = 'line') %>%
+  add_trace(y = ~NLD, name = 'Holanda', mode = 'line') %>%
+  add_trace(y = ~NZL, name = 'Nova Zelandia', mode = 'line') %>%
+  add_trace(y = ~PAK, name = 'Paquistao', mode = 'line') %>%
+  add_trace(y = ~RUS, name = 'Russia', mode = 'line') %>%
+  add_trace(y = ~URY, name = 'Uruguai', mode = 'line') %>%
+  add_trace(y = ~USA, name = 'USA', mode = 'line', color = I("black")) %>%
+  layout(title = 'Casos confirmados de Covid-19 para 1000 habitantes',
+         xaxis = list (title = NA),
+         yaxis = list (title = 'Casos'))
+Casos
+   
+Mortes = plot_ly(mortes_mil_taxa, x = ~date, y = ~BRA, name = 'Brasil',mode = 'line', type = 'scatter') %>% 
+  add_trace(y = ~IDN, name = 'Indonesia', mode = 'line') %>% 
+  add_trace(y = ~IND, name = 'India', mode = 'line') %>% 
+  add_trace(y = ~ITA, name = 'Italia', mode = 'line') %>%
+  add_trace(y = ~JPN, name = 'Japao', mode = 'line') %>%
+  add_trace(y = ~NLD, name = 'Holanda', mode = 'line') %>%
+  add_trace(y = ~NZL, name = 'Nova Zelandia', mode = 'line') %>%
+  add_trace(y = ~PAK, name = 'Paquistao', mode = 'line') %>%
+  add_trace(y = ~RUS, name = 'Russia', mode = 'line') %>%
+  add_trace(y = ~URY, name = 'Uruguai', mode = 'line') %>%
+  add_trace(y = ~USA, name = 'USA', mode = 'line', color = I("black")) %>%
+  layout(title = 'Mortes confirmadas de Covid-19 para 1000 habitantes',
+         xaxis = list (title = NA),
+         yaxis = list (title = 'Mortes'))  
+Mortes
+
+Testes = plot_ly(testes_mil_taxa, x = ~date, y = ~BRA, name = 'Brasil',mode = 'line', type = 'scatter') %>% 
+  add_trace(y = ~IDN, name = 'Indonesia', mode = 'line') %>% 
+  add_trace(y = ~IND, name = 'India', mode = 'line') %>% 
+  add_trace(y = ~ITA, name = 'Italia', mode = 'line') %>%
+  add_trace(y = ~JPN, name = 'Japao', mode = 'line') %>%
+  add_trace(y = ~NLD, name = 'Holanda', mode = 'line') %>%
+  add_trace(y = ~NZL, name = 'Nova Zelandia', mode = 'line') %>%
+  add_trace(y = ~PAK, name = 'Paquistao', mode = 'line') %>%
+  add_trace(y = ~RUS, name = 'Russia', mode = 'line') %>%
+  add_trace(y = ~URY, name = 'Uruguai', mode = 'line') %>%
+  add_trace(y = ~USA, name = 'USA', mode = 'line') %>%
+  layout(title = 'Testes realizados de Covid-19 para 1000 habitantes',
+         xaxis = list (title = NA),
+         yaxis = list (title = 'Testes')) 
+Testes
+
+```
